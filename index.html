@@ -1,78 +1,29 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
-<!-- saved from url=(0037)https://register.metu.edu.tr/main.php -->
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
 <html>
 
 <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=windows-1254">
-
+    <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-9">
     <style type="text/css" title="currentStyle" media="screen">
         @import "combined.css";
     </style>
     <title>Registration</title>
-    <script src="./Registration_files/api.js" async="" defer=""></script>
     <script>
-        let startTime = sessionStorage.getItem('registrationStartTime');
+        let startTime;
         let timerInterval;
-        let isRunning = sessionStorage.getItem('isTimerRunning') === 'true';
+        let isRunning = false;
 
-        // Add timer display div
+        // Start the timer when the page loads
         window.onload = function () {
-            // Add timer display to the page
-            const timerDiv = document.createElement('div');
-            timerDiv.id = 'timer';
-            timerDiv.style.cssText = 'text-align: center; font-size: 24px; margin: 10px 0;';
-            timerDiv.innerHTML = 'Time: <span id="minutes">00</span>:<span id="seconds">00</span>.<span id="milliseconds">000</span>';
+            startTimer();
+        };
 
-            // Insert after header
-            const header = document.getElementById('header');
-            header.parentNode.insertBefore(timerDiv, header.nextSibling);
-
-            if (isRunning) {
+        function startTimer() {
+            if (!isRunning) {
+                isRunning = true;
+                startTime = new Date().getTime();
                 timerInterval = setInterval(updateTimer, 10);
             }
-
-            // Handle form submissions
-            document.querySelector('form').addEventListener('submit', function (event) {
-                event.preventDefault();
-
-                if (event.submitter && event.submitter.name === 'submitAddCourse') {
-                    // Get the captcha response
-                    const captchaResponse = document.querySelector('[name="h-captcha-response"]').value;
-
-                    if (!captchaResponse) {
-                        alert('Please complete the captcha first!');
-                        return;
-                    }
-
-                    // Get course details
-                    const courseCode = document.getElementById('textAddCourseCode').value;
-                    const section = document.getElementById('textAddCourseSection').value;
-
-                    // Stop the timer and show the result
-                    isRunning = false;
-                    clearInterval(timerInterval);
-                    const finalTime = document.getElementById('timer').textContent;
-
-                    // Calculate elapsed time in seconds
-                    const currentTime = new Date().getTime();
-                    const elapsedSeconds = (currentTime - startTime) / 1000;
-
-                    if (elapsedSeconds <= 30) {
-                        alert(`Course ${courseCode} Section ${section} added successfully!\nYour registration time: ${finalTime}`);
-                    } else {
-                        alert(`Course capacity is full! You weren't fast enough!\nYour registration time: ${finalTime}`);
-                    }
-
-                    // Reset timer data
-                    sessionStorage.removeItem('registrationStartTime');
-                    sessionStorage.removeItem('isTimerRunning');
-
-                    // Clear the form fields
-                    document.getElementById('textAddCourseCode').value = '';
-                    document.getElementById('textAddCourseSection').value = '';
-                }
-            });
-        };
+        }
 
         function updateTimer() {
             const currentTime = new Date().getTime();
@@ -87,44 +38,58 @@
             document.getElementById('minutes').textContent = minutes.toString().padStart(2, '0');
         }
 
-        // Add this function to verify captcha
-        function onCaptchaSuccess(token) {
-            // Enable the submit button when captcha is completed
-            document.querySelector('[name="submitAddCourse"]').disabled = false;
+        function stopTimer() {
+            if (isRunning) {
+                isRunning = false;
+                clearInterval(timerInterval);
+                // You can add code here to save or display the final time
+            }
         }
 
-        // Add this function to handle captcha expiration
-        function onCaptchaExpired() {
-            // Disable the submit button when captcha expires
-            document.querySelector('[name="submitAddCourse"]').disabled = true;
+        // Store timer data in sessionStorage to persist across pages
+        function storeTimerData() {
+            sessionStorage.setItem('registrationStartTime', startTime);
+            sessionStorage.setItem('isTimerRunning', isRunning);
+        }
+
+        // Add this to the form submission
+        document.querySelector('form').addEventListener('submit', function () {
+            storeTimerData();
+        });
+
+        function handleLogin(event) {
+            event.preventDefault();
+
+            // Get username
+            const username = document.getElementById('textUserCode').value;
+
+            // Store username and timer data
+            sessionStorage.setItem('username', username);
+            storeTimerData();
+
+            // Redirect to register page
+            window.location.href = 'register.html';
+
+            return false;
         }
     </script>
 </head>
 
-<body data-new-gr-c-s-check-loaded="14.1223.0" data-gr-ext-installed="">
-    <noscript>
-        <div class="container">
-            <div class="row">
-                <div class="col">
-                    <h3 class="text-center">
-                        ( [m~I~V [2C̯ [m~I~V)
-                        <br><br>
-                        To use this application, please enable JavaScript.
-                    </h3>
-                </div>
-            </div>
-        </div>
-    </noscript>
+<body>
 
     <div id="container">
 
         <div class="tl_hf"></div>
         <div class="tr_hf"></div>
         <div id="header">
-            <img style="position: relative; float:left;" src="./Registration_files/metu-logo-small.jpg" alt="">
+            <img style="position: relative; float:left;" src="metu-logo-small.jpg" alt="">
             <span style="position: relative; left: -35px; top: 5px;">
                 METU Interactive Registration
             </span>
+        </div>
+
+        <div id="timer" style="text-align: center; font-size: 24px; margin: 10px 0;">
+            Time: <span id="minutes">00</span>:<span id="seconds">00</span>.<span id="milliseconds">000</span>
         </div>
 
         <div class="tl"></div>
@@ -133,323 +98,68 @@
             <a href="help.html" target="_blank" title="Registration help">[ <u>Help</u> ]</a>&nbsp;&nbsp;
         </div>
         <table cellpadding="0" cellspacing="0" width="100%">
-            <tbody>
-                <tr>
-                    <td valign="top" class="seperator">
-                        <div id="single_content">
+            <tr>
+                <td valign="top" class="seperator">
+                    <div id="single_content">
 
-                            <h2></h2>
+                        <h2>Login</h2>
 
-
-                            <form method="post" action="main.php">
-
-
-                                <br>
-                                <table width="80%" align="center">
-                                    <tbody>
-                                        <tr>
-                                            <td class="label">Id Number :</td>
-                                            <td>
-                                                <script>document.write(sessionStorage.getItem('username') || '');</script>
-                                            </td>
-                                            <td class="label">Name :</td>
-                                            <td>Kemal Kurdaş</td>
-                                        </tr>
-                                        <tr>
-                                            <td class="label">Department :</td>
-                                            <td>CENG</td>
-                                            <td class="label">Year :</td>
-                                            <td>4</td>
-                                        </tr>
-                                        <tr>
-                                            <td class="label">Sem no :</td>
-                                            <td>8</td>
-                                            <td class="label">CumGpa :</td>
-                                            <td>3.00</td>
-                                        </tr>
-                                        <tr>
-                                            <td class="label">Standing :</td>
-                                            <td>SATISFACTORY</td>
-                                            <td class="label">Paid Money :</td>
-                                            <td>1000.00</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-
-                                <br>
-
-                                <table align="center">
-                                    <tbody>
-                                        <tr>
-                                            <td><b><u>Reminder (Last Update 22/02/2025 14:00:00):</u></b> </td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                                <br>
-
-
-                                <table align="center">
-                                    <tbody>
-                                        <tr>
-                                            <td colspan="3">
-                                                <table class="dTable">
-                                                    <tbody>
-                                                        <tr>
-                                                            <td></td>
-                                                            <th scope="col" class="dTableTitle">Course Code</th>
-                                                            <th scope="col" class="dTableTitle">Course Name</th>
-                                                            <th scope="col" class="dTableTitle">Credit</th>
-                                                            <th scope="col" class="dTableTitle">Section</th>
-                                                            <th scope="col" class="dTableTitle">Category</th>
-                                                            <th scope="col" class="dTableTitle">Replace Course</th>
-                                                            <th scope="col" class="dTableTitle">Replace Sem</th>
-                                                        </tr>
-                                                        <tr>
-                                                            <td><input type="radio" name="radio_courseList"
-                                                                    class="dTableclean" value="5710403|1|7"></td>
-                                                            <td>CENG0403</td>
-                                                            <td>SPECIAL TOPICS IN COMPUTER ENGINEERING: INTRODUCTION TO
-                                                                DEEP LEARNING</td>
-                                                            <td>3.00</td>
-                                                            <td>1</td>
-                                                            <td>TECHNICAL ELECTIVE</td>
-                                                            <td>0</td>
-                                                            <td>0</td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td><input type="radio" name="radio_courseList"
-                                                                    class="dTableclean" value="5710453|1|7"></td>
-                                                            <td class="dTableAlt">CENG0453</td>
-                                                            <td class="dTableAlt">SPECIAL TOPICS IN COMPUTER
-                                                                ENGINEERING: SOFTWARE CONSTRUCTION</td>
-                                                            <td class="dTableAlt">3.00</td>
-                                                            <td class="dTableAlt">1</td>
-                                                            <td class="dTableAlt">TECHNICAL ELECTIVE</td>
-                                                            <td class="dTableAlt">0</td>
-                                                            <td class="dTableAlt">0</td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td><input type="radio" name="radio_courseList"
-                                                                    class="dTableclean" value="5710492|11|1"></td>
-                                                            <td>CENG0492</td>
-                                                            <td>COMPUTER ENGINEERING DESIGN II</td>
-                                                            <td>4.00</td>
-                                                            <td>11</td>
-                                                            <td>MUST COURSE</td>
-                                                            <td>0</td>
-                                                            <td>0</td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td><input type="radio" name="radio_courseList"
-                                                                    class="dTableclean" value="6040206|1|9"></td>
-                                                            <td class="dTableAlt">GERM0206</td>
-                                                            <td class="dTableAlt">GERMAN 206 B1.2</td>
-                                                            <td class="dTableAlt">4.00</td>
-                                                            <td class="dTableAlt">1</td>
-                                                            <td class="dTableAlt">NOT INCLUDED</td>
-                                                            <td class="dTableAlt">0</td>
-                                                            <td class="dTableAlt">0</td>
-                                                        </tr>
-                                                    </tbody>
-                                                </table>
-
-
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td>&nbsp;</td>
-                                        </tr>
-                                        <tr>
-                                            <td align="right" width="33%"><input type="submit"
-                                                    name="submitReplaceCourse" value="[ Replace Course ]"></td>
-                                            <td align="center" width="33%"><input type="submit"
-                                                    name="submitRemoveReplacement" value="[ Remove Replacement ]"></td>
-                                            <td align="left" width="33%"><input type="submit" name="submitDropCourse"
-                                                    value="[ Drop Course ]"></td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-
-                                <br>
-                                <div id="formmessage">
-                                    <font color="red"></font>
-                                </div>
-
-                                <br>
-                                <br>
-
-                                <div class="formContainer">
-                                    <div class="form">
-                                        <center>
-                                            <fieldset>
-                                                <legend>Change Course [Section <b>/</b> Category]</legend>
-                                                <div class="fieldsetContainer">
-                                                    <table width="100%">
-                                                        <tbody>
-                                                            <tr>
-                                                                <td class="label" width="25%">Course Section :</td>
-                                                                <td width="25%"><input class="formInput" type="text"
-                                                                        id="textChangeCourseSection"
-                                                                        name="textChangeCourseSection" value=""><label
-                                                                        class="formErr"
-                                                                        for="textChangeCourseSection"></label></td>
-                                                                <td class="label" width="25%">Course Category :</td>
-                                                                <td width="25%">
-                                                                    <select class="formInput"
-                                                                        id="selectChangeCourseCategory"
-                                                                        name="selectChangeCourseCategory">
-                                                                        <option value="1">MUST</option>
-                                                                        <option value="4">RESTRICTED ELECTIVE </option>
-                                                                        <option value="5">FREE ELECTIVE </option>
-                                                                        <option value="7">TECHNICAL ELECTIVE </option>
-                                                                        <option value="8">NONTECHNICAL ELECTIVE
-                                                                        </option>
-                                                                        <option value="9">NOT INCLUDED</option>
-                                                                    </select>
-                                                                </td>
-                                                            </tr>
-                                                            <tr>
-                                                                <td></td>
-                                                                <td><input type="submit" name="submitChangeSection"
-                                                                        value="[ Change Section ]"></td>
-                                                                <td></td>
-                                                                <td><input type="submit" name="submitChangeCategory"
-                                                                        value="[ Change Category ]"></td>
-                                                            </tr>
-                                                        </tbody>
-                                                    </table>
-                                                </div>
-                                            </fieldset>
-                                        </center>
-                                    </div>
-                                </div>
-
-
-                                <br>
-
-                                <div class="formContainer">
-                                    <div class="form">
-                                        <center>
-                                            <fieldset>
-                                                <legend>Add Course</legend>
-                                                <div class="fieldsetContainer">
-                                                    <table width="100%">
-                                                        <tbody>
-                                                            <tr>
-                                                                <td class="label" width="25%">Course Code :</td>
-                                                                <td width="25%"><input type="text"
-                                                                        id="textAddCourseCode" name="textAddCourseCode"
-                                                                        value=""></td>
-                                                                <td class="label" width="24%">Course Section :</td>
-                                                                <td width="26%"><input type="text"
-                                                                        id="textAddCourseSection"
-                                                                        name="textAddCourseSection" value=""></td>
-                                                            </tr>
-                                                            <tr>
-                                                                <td colspan="4"></td>
-                                                            </tr>
-                                                            <tr>
-                                                                <td class="label">Course Category :</td>
-                                                                <td>
-                                                                    <select id="selectAddCourseCategory"
-                                                                        name="selectAddCourseCategory">
-                                                                        <option value="1">MUST</option>
-                                                                        <option value="4">RESTRICTED ELECTIVE </option>
-                                                                        <option value="5">FREE ELECTIVE </option>
-                                                                        <option value="7">TECHNICAL ELECTIVE </option>
-                                                                        <option value="8">NONTECHNICAL ELECTIVE
-                                                                        </option>
-                                                                        <option value="9">NOT INCLUDED</option>
-                                                                    </select>
-                                                                </td>
-                                                            </tr>
-                                                            <tr>
-                                                                <td colspan="4"></td>
-                                                            </tr>
-                                                            <tr>
-                                                                <td colspan="4">
-                                                                    <center>
-                                                                        <div class="h-captcha"
-                                                                            data-sitekey="13735523-8445-4a2c-a0e3-c969968c0cc6"
-                                                                            data-callback="onCaptchaSuccess"
-                                                                            data-expired-callback="onCaptchaExpired">
-                                                                        </div>
-                                                                    </center>
-                                                                </td>
-                                                            </tr>
-                                                            <tr>
-                                                                <td colspan="4">&nbsp;</td>
-                                                            </tr>
-                                                            <tr>
-                                                                <td></td>
-                                                                <td></td>
-                                                                <td></td>
-                                                                <td><input type="submit" name="submitAddCourse"
-                                                                        value="[ Add Course ]"></td>
-                                                            </tr>
-                                                        </tbody>
-                                                    </table>
-                                                </div>
-
-
-
-                                            </fieldset>
-                                        </center>
-                                    </div>
-                                </div>
-
-                                <br>
-
-                                <div class="formContainer">
-                                    <div class="form">
-                                        <center>
-                                            <fieldset>
-                                                <legend>Request Approval</legend>
-                                                <div class="fieldsetContainer">
-                                                    <table width="100%">
-                                                        <tbody>
-                                                            <tr>
-                                                                <td style="text-align: center;">
-                                                                    <em><strong>
-                                                                            It is student's own responsibility to follow
-                                                                            the registration approval process. Your
-                                                                            advisor will be informed for your
-                                                                            registration approval. Remember, your
-                                                                            request cannot be revoked.
-                                                                        </strong></em>
-                                                                </td>
-                                                            </tr>
-                                                            <tr></tr>
-                                                            <tr>
-                                                                <td style="text-align: center;">
-                                                                    <input style="font-size: 16px; padding: 10px;"
-                                                                        class="formSubmit" type="submit"
-                                                                        name="submitRequestApproval"
-                                                                        value="Request Registration Approval">
-                                                                </td>
-                                                            </tr>
-                                                        </tbody>
-                                                    </table>
-                                                </div>
-                                            </fieldset>
-                                        </center>
-                                    </div>
-                                </div>
-
-                                <input type="hidden" name="hidden_redir"
-                                    value="ynYr-dI7jpwU9ad-wJUH0bTTze-oce7B9dVi4cZi2xMu9gbl4avhcDa-vnwDoV6jQ">
-                                <input type="hidden" name="hidden_form_id"
-                                    value="d22b6295249477d09915a77c050c09fb3def4995d5df673a6766e360df1f86f6a08df6c2760d616b81b9cf241078647270c17749e868df0220fe31f61a219e99">
-                            </form>
+                        <div id="formmessage">
+                            <font color="red"></font>
                         </div>
 
-                        <div class="logout">
-                            <a href="logout.php">[ Logout ]</a>
-                        </div>
+                        <br>
 
-                    </td>
-                </tr>
-            </tbody>
+                        <form method="POST" action="register.html" id="loginForm" onsubmit="return handleLogin(event)">
+
+                            <div class="formContainer">
+                                <div class="form">
+                                    <label class="formLabel" for="textUserCode">User Code :</label>
+                                    <input class="formInput" type="text" id="textUserCode" name="textUserCode"
+                                        value=""><label class="formErr" for="textUserCode"></label>
+                                    <br>
+
+                                    <label class="formLabel" for="textPassword">Password :</label>
+                                    <input class="formInput" type="password" id="textPassword" name="textPassword"
+                                        value=""><label class="formErr" for="textPassword"></label>
+                                    <br>
+
+                                    <label class="formLabel" for="selectProgType">Program Type :</label>
+                                    <select class="formInput" id="selectProgType" name="selectProgType">
+                                        <option value="1">Major</option>
+                                        <option value="2">Double Major</option>
+                                        <option value="3">Minor</option>
+                                        <option value="4">Teaching Certificate</option>
+                                    </select>
+                                    <br>
+                                    <br>
+                                    <input type="submit" name="submitLogin" value="[ Login ]">
+                                    <br>
+                                    <br>
+                                    <!--
+   <B>Click<a target='_blank' href="http://oidb.metu.edu.tr/duyuru/onlisans-ve-lisans-programlarinda-sinamali-durumda-olan-ogrenciler-icin-2013-2014i-donemine-m"> here</a> for the announcement regarding the undergraduate students whose status is probation</B>
+    <strong><a target='_blank' href="http://math.metu.edu.tr/sites/math.metu.edu.tr/files/untitled2_0.pdf">Matematik 118, 120 ve 219 derslerini yaz okulunda almak isteyen ogrencilerin dikkatine.</a></strong>
+-->
+                                    <br>
+
+                                </div>
+                            </div>
+
+
+                            <br>
+                            <!--<font color="red">
+You must obtain your advisor's approval if you have made any changes in your<br/>
+course program during the add-drop period in order to complete your<br/>
+registration.<br/>
+</font>--><br>
+                            <!--
+<div align="right"><a href="https://oibs2.metu.edu.tr/help" target="_blank" title="Registration help">[ <u>Help</u> ]</a>&nbsp;&nbsp;</div>
+-->
+                        </form>
+                    </div>
+
+                </td>
+            </tr>
         </table>
         <div class="bl"></div>
         <div class="br"></div>
@@ -463,53 +173,6 @@
         <div class="br_hf"></div>
 
     </div>
-
-
-    <div aria-hidden="true"
-        style="background-color: rgb(255, 255, 255); border: 1px solid rgb(215, 215, 215); box-shadow: rgba(0, 0, 0, 0.1) 0px 0px 4px; border-radius: 4px; left: auto; top: -10000px; z-index: -2147483648; position: absolute; pointer-events: auto; transition: opacity 0.15s ease-out; opacity: 0; visibility: hidden;">
-        <div style="position: relative; z-index: 1;"><iframe src="./Registration_files/hcaptcha(1).html" frameborder="0"
-                scrolling="no"
-                allow="private-state-token-issuance &#39;src&#39;; private-state-token-redemption &#39;src&#39;"
-                title="Main content of the hCaptcha challenge"
-                style="border: 0px; z-index: 2000000000; position: relative;"></iframe></div>
-        <div
-            style="width: 100%; height: 100%; position: fixed; pointer-events: none; top: 0px; left: 0px; z-index: 0; background-color: rgb(255, 255, 255); opacity: 0.05;">
-        </div>
-        <div
-            style="border-width: 11px; position: absolute; pointer-events: none; margin-top: -11px; z-index: 1; right: 100%;">
-            <div
-                style="border-width: 10px; border-style: solid; border-color: transparent rgb(255, 255, 255) transparent transparent; position: relative; top: 10px; z-index: 1;">
-            </div>
-            <div
-                style="border-width: 11px; border-style: solid; border-color: transparent rgb(215, 215, 215) transparent transparent; position: relative; top: -11px; z-index: 0;">
-            </div>
-        </div>
-    </div>
-</body><grammarly-desktop-integration data-grammarly-shadow-root="true"><template shadowrootmode="open">
-        <style>
-            div.grammarly-desktop-integration {
-                position: absolute;
-                width: 1px;
-                height: 1px;
-                padding: 0;
-                margin: -1px;
-                overflow: hidden;
-                clip: rect(0, 0, 0, 0);
-                white-space: nowrap;
-                border: 0;
-                -moz-user-select: none;
-                -webkit-user-select: none;
-                -ms-user-select: none;
-                user-select: none;
-            }
-
-            div.grammarly-desktop-integration:before {
-                content: attr(data-content);
-            }
-        </style>
-        <div aria-label="grammarly-integration" role="group" tabindex="-1" class="grammarly-desktop-integration"
-            data-content="{&quot;mode&quot;:&quot;full&quot;,&quot;isActive&quot;:true,&quot;isUserDisabled&quot;:false}">
-        </div>
-    </template></grammarly-desktop-integration>
+</body>
 
 </html>
