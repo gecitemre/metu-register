@@ -58,9 +58,9 @@
                     const elapsedSeconds = (currentTime - startTime) / 1000;
 
                     if (elapsedSeconds <= 30) {
-                        alert(`Course ${courseCode} Section ${section} added successfully!\nYour registration time: ${finalTime}`);
+                        alert(`Course ${courseCode} Section ${section} added successfully!\n${finalTime}`);
                     } else {
-                        alert(`Course capacity is full! You weren't fast enough!\nYour registration time: ${finalTime}`);
+                        alert(`Course capacity is full! You weren't fast enough!\n${finalTime}`);
                     }
 
                     // Reset timer data
