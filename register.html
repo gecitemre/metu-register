@@ -57,7 +57,7 @@
                     const currentTime = new Date().getTime();
                     const elapsedSeconds = (currentTime - startTime) / 1000;
 
-                    if (elapsedSeconds <= 30) {
+                    if (elapsedSeconds <= 20) {
                         alert(`Course ${courseCode} Section ${section} added successfully!\n${finalTime}`);
                     } else {
                         alert(`Course capacity is full! You weren't fast enough!\n${finalTime}`);
