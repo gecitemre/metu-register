@@ -60,11 +60,7 @@
         function handleLogin(event) {
             event.preventDefault();
 
-            // Get username
-            const username = document.getElementById('textUserCode').value;
-
-            // Store username and timer data
-            sessionStorage.setItem('username', username);
+            // Store timer data
             storeTimerData();
 
             // Redirect to register page
